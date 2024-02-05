@@ -1,15 +1,40 @@
-import React, { useEffect } from "react";
+import React, { useEffect,useState,useCallback } from "react";
 import "../css/App.css";
+const lodash = require("lodash");
 
 function Weather() {
   const [temp, setTemp] = React.useState(null);
   const [searchCity, setSearchCity] = React.useState("Mumbai");
+  const [savetoDB, setSaveToDb] = useState("");
+
+//   function debounce(fn, delay) {
+//     let timer;
+//     return function () {
+//       let context = this,
+//         args = arguments;
+//       clearTimeout(timer);
+//       timer = setTimeout(() => {
+//         fn.apply(this, args);
+//       }, 1000);
+//     };
+//   }
+
+//   const delaySaveToDb = useCallback(debounce((val)=>{
+//     setSearchCity(val)
+//   }
+// , 1000), []);
 
 
-  function searchItem(e) {
-  let  value = e.target.value;
-    setSearchCity(value)
-  }
+  // const searchItem = (e) => {
+  //   console.log("hi")
+  //    delaySaveToDb(e.target.value);
+  // };
+
+  let searchItem = lodash.debounce(function (e) {
+    let value = e.target.value;
+    setSearchCity(value);
+    console.log("Function debounced after 1000ms!");
+  }, 1000);
 
   function getWeather() {
     fetch(
@@ -19,33 +44,35 @@ function Weather() {
         return res.json();
       })
       .then((data) => {
-   
-        if(data.message=="city not found" || data.message=="Nothing to geocode"){
-          setTemp("")
-        }
-        else{
-        setTemp(data.main.temp)
+        if (
+          data.message == "city not found" ||
+          data.message == "Nothing to geocode"
+        ) {
+          setTemp("");
+        } else {
+          setTemp(data.main.temp);
         }
       });
   }
 
   useEffect(() => {
     getWeather();
-  },[searchCity]);
-
+  }, [searchCity]);
 
   return (
-    <div>
-    <div className="box">
-      <input className="input"
-        onChange={searchItem}
-        type="text"
-        placeholder="Search"
-      />
+    <div className="div">
+      <div className="box">
+        <input
+          className="input"
+          onChange={searchItem}
+          type="text"
+          placeholder="Search"
+        />
       </div>
-      <div className="city">{temp}</div><br></br>
+      <div className="city">{temp}</div>
+      <br></br>
       <div className="data">{searchCity}</div>
-</div>
+    </div>
   );
 }
 
